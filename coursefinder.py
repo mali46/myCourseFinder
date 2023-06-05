@@ -44,7 +44,7 @@ preferred_days = [day for day in days if day.lower() in user_input_preprocessed]
 
 category = None
 for cat, keywords in categories.items():
-    if any(keyword in user_input_preprocessed for keyword in keywords):
+    if any(keyword in user_input for keyword in keywords):
         category = cat
         break
 
@@ -57,7 +57,7 @@ for time in ["morning", "afternoon", "evening"]:
 # Apply filters
 df_filtered = df.copy()
 if category:
-    df_filtered = df_filtered[df_filtered['category'] == category]
+    df_filtered = df_filtered[df_filtered['category'] == int(category)]
 if preferred_days:
     df_filtered = df_filtered[df_filtered[preferred_days].sum(axis=1) > 0]
 if time_of_day:
