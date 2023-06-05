@@ -40,31 +40,8 @@ vectorizer_desc = CountVectorizer()
 vectorizer_summary = CountVectorizer()
 vectorizer_subject = CountVectorizer()
 
-count_matrix_name = vectorizer_name.fit_transform(df['Course Name'])
-count_matrix_desc = vectorizer_desc.fit_transform(df['Course Description'])
-count_matrix_summary = vectorizer_summary.fit_transform(df['Summary'])
-count_matrix_subject = vectorizer_subject.fit_transform(df['Subject'])
-
-# Set the weights
-weight_name = 0.35
-weight_desc = 0.2
-weight_summary = 0.1
-weight_subject = 0.35
-
 user_input = st.text_input("What course are you looking for? ")
 user_input = preprocess(user_input)
-
-# Calculate the weighted similarities
-similarity_name = weight_name * (count_matrix_name * vectorizer_name.transform([user_input]).T)
-similarity_desc = weight_desc * (count_matrix_desc * vectorizer_desc.transform([user_input]).T)
-similarity_summary = weight_summary * (count_matrix_summary * vectorizer_summary.transform([user_input]).T)
-similarity_subject = weight_subject * (count_matrix_subject * vectorizer_subject.transform([user_input]).T)
-
-# Sum the weighted similarities
-total_similarity = similarity_name + similarity_desc + similarity_summary + similarity_subject
-
-# Get the top matches based on the total similarity
-top_matches = total_similarity.toarray().flatten().argsort()[-8:]
 
 category = None
 for cat, keywords in categories.items():
@@ -81,18 +58,35 @@ for time in ["morning", "afternoon", "evening"]:
         time_of_day = time.capitalize()
         break
 
-filtered_matches = []
-for match in top_matches[::-1]: 
-    if category is not None and str(df.iloc[match]['category']) != category:
-        continue
-    if preferred_days and df.iloc[match][preferred_days].sum() == 0:
-        continue
-    if time_of_day is not None and df.iloc[match]['TimeOfDay'].lower() != time_of_day:
-        continue
-    filtered_matches.append(match)
-    if len(filtered_matches) == 8:
-        break
+# Apply the filters
+if category is not None:
+    df = df[df['category'] == category]
+if preferred_days:
+    df = df[df[preferred_days].sum(axis=1) > 0]
+if time_of_day is not None:
+    df = df[df['TimeOfDay'].str.lower() == time_of_day]
 
-    
-for i, match in enumerate(filtered_matches, start=1):
-    st.write(f"{i}. Course Code: {original_df.iloc[match]['Course Code']}, Course Name: {original_df.iloc[match]['Course Name']}\n")
+# Calculate the weighted similarities for the filtered courses
+count_matrix_name = vectorizer_name.fit_transform(df['Course Name'])
+count_matrix_desc = vectorizer_desc.fit_transform(df['Course Description'])
+count_matrix_summary = vectorizer_summary.fit_transform(df['Summary'])
+count_matrix_subject = vectorizer_subject.fit_transform(df['Subject'])
+
+weight_name = 0.25
+weight_desc = 0.20
+weight_summary = 0.10
+weight_subject = 0.45
+
+similarity_name = weight_name * (count_matrix_name * vectorizer_name.transform([user_input]).T)
+similarity_desc = weight_desc * (count_matrix_desc * vectorizer_desc.transform([user_input]).T)
+similarity_summary = weight_summary * (count_matrix_summary * vectorizer_summary.transform([user_input]).T)
+similarity_subject = weight_subject * (count_matrix_subject * vectorizer_subject.transform([user_input]).T)
+
+total_similarity = similarity_name + similarity_desc + similarity_summary + similarity_subject
+
+# Get the top matches based on the total similarity
+top_matches = total_similarity.toarray().flatten().argsort()[-8:]
+
+for i, match in enumerate(top_matches[::-1], start=1):
+    original_index = df.iloc[match].name  # Get the original index
+    st.write(f"{i}. Course Code: {original_df.loc[original_index]['Course Code']}, Course Name: {original_df.loc[original_index]['Course Name']}\n")
