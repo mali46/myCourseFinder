@@ -22,6 +22,7 @@ def preprocess(text):
     return text
 
 df = pd.read_csv('yes.csv', encoding='utf-8', on_bad_lines='skip', delimiter=";")
+original_df = df.copy()  # Keep a copy of the original dataframe
 
 categories = {
     "1": ["basic", "easy", "intro", "relaxed", "chill"],
@@ -45,25 +46,24 @@ count_matrix_summary = vectorizer_summary.fit_transform(df['Summary'])
 count_matrix_subject = vectorizer_subject.fit_transform(df['Subject'])
 
 # Set the weights
-weight_name = 0.2
-weight_desc = 0.20
-weight_summary = 0.10
-weight_subject = 0.5
-
+weight_name = 0.35
+weight_desc = 0.2
+weight_summary = 0.1
+weight_subject = 0.35
 
 user_input = st.text_input("What course are you looking for? ")
 user_input = preprocess(user_input)
 
-    # Calculate the weighted similarities
+# Calculate the weighted similarities
 similarity_name = weight_name * (count_matrix_name * vectorizer_name.transform([user_input]).T)
 similarity_desc = weight_desc * (count_matrix_desc * vectorizer_desc.transform([user_input]).T)
 similarity_summary = weight_summary * (count_matrix_summary * vectorizer_summary.transform([user_input]).T)
 similarity_subject = weight_subject * (count_matrix_subject * vectorizer_subject.transform([user_input]).T)
 
-    # Sum the weighted similarities
+# Sum the weighted similarities
 total_similarity = similarity_name + similarity_desc + similarity_summary + similarity_subject
 
-    # Get the top matches based on the total similarity
+# Get the top matches based on the total similarity
 top_matches = total_similarity.toarray().flatten().argsort()[-8:]
 
 category = None
@@ -95,4 +95,4 @@ for match in top_matches[::-1]:
 
     
 for i, match in enumerate(filtered_matches, start=1):
-    st.write(f"{i}. Course Code: {df.iloc[match]['Course Code']}, Course Name: {df.iloc[match]['Course Name']}\n")
+    st.write(f"{i}. Course Code: {original_df.iloc[match]['Course Code']}, Course Name: {original_df.iloc[match]['Course Name']}\n")
