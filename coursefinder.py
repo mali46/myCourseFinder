@@ -1,11 +1,16 @@
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from nltk.corpus import stopwords
 import re
 import nltk
 import streamlit as st 
 
-nltk.download('punkt')  # Uncomment this line if it's your first time running nltk
+nltk.download('punkt')  
+from nltk.corpus import stopwords
+
+try:
+    _ = stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
 
 def preprocess(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text, re.I|re.A)
