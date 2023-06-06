@@ -23,7 +23,7 @@ def preprocess(text):
     text = ' '.join(filtered_tokens)
     return text
 
-df = pd.read_csv('yes2.csv', encoding='utf-8', on_bad_lines='skip', delimiter=";")
+df = pd.read_csv('yes3.csv', encoding='utf-8', on_bad_lines='skip', delimiter=";")
 
 categories = {
     "1": ["basic", "easy", "intro", "relaxed", "chill", "fun"],
