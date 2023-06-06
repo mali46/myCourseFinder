@@ -13,6 +13,7 @@ try:
 except LookupError:
     nltk.download('stopwords')
 
+st.write("MyCourseFinder")
 def preprocess(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text, re.I|re.A)
     text = text.lower()
@@ -22,10 +23,10 @@ def preprocess(text):
     text = ' '.join(filtered_tokens)
     return text
 
-df = pd.read_csv('yes.csv', encoding='utf-8', on_bad_lines='skip', delimiter=";")
+df = pd.read_csv('yes2.csv', encoding='utf-8', on_bad_lines='skip', delimiter=";")
 
 categories = {
-    "1": ["basic", "easy", "intro", "relaxed", "chill"],
+    "1": ["basic", "easy", "intro", "relaxed", "chill", "fun"],
     "2": ["medium", "intermediate", "not too hard"],
     "3": ["advanced", "difficult", "hard"],
 }
